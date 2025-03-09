@@ -74,8 +74,8 @@ export default function HomePage() {
             value={activeTab}
             onValueChange={setActiveTab}
           >
-            <div className="flex mb-4">
-              <TabsList className="mx-auto">
+            <div className="mb-4">
+              <TabsList className="w-full">
                 <TabsTrigger value="unbelievers">Unbelievers</TabsTrigger>
                 <TabsTrigger value="brethren">Brethren in Hardship</TabsTrigger>
               </TabsList>
