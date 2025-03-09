@@ -28,7 +28,8 @@ export class ReplitStorage implements IStorage {
   constructor() {
     this.sessionStore = new MemorySession({
       checkPeriod: 86400000, // prune expired entries every 24h
-      stale: false
+      stale: false,
+      ttl: 86400000 // 24 hours
     });
     // Initialize collections if they don't exist
     this.initializeCollections();

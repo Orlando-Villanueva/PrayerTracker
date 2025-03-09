@@ -78,7 +78,8 @@ export function setupAuth(app: Express) {
     try {
       const user = await storage.getUser(id);
       if (!user) {
-        return done(new Error('User not found'), null);
+        console.error('User not found during deserialization:', id);
+        return done(null);
       }
       done(null, user);
     } catch (error) {
@@ -114,19 +115,28 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/logout", (req, res, next) => {
-    req.logout((err) => {
-      if (err) {
-        console.error('Logout error:', err);
-        return next(err);
-      }
+    if (!req.isAuthenticated()) {
+      return res.sendStatus(200);
+    }
+
+    if (req.session) {
       req.session.destroy((err) => {
         if (err) {
           console.error('Session destruction error:', err);
           return next(err);
         }
-        res.sendStatus(200);
+        req.logout((err) => {
+          if (err) {
+            console.error('Logout error:', err);
+            return next(err);
+          }
+          res.clearCookie('prayer-tracker-session');
+          res.sendStatus(200);
+        });
       });
-    });
+    } else {
+      res.sendStatus(200);
+    }
   });
 
   app.get("/api/user", (req, res) => {
