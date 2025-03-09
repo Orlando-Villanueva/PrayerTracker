@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { cn } from "@/lib/utils";
@@ -11,12 +10,12 @@ const ResponsiveTabsList = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
 >(({ className, ...props }, ref) => {
   const isMobile = useIsMobile();
-  
+
   return (
     <TabsPrimitive.List
       ref={ref}
       className={cn(
-        "flex w-full gap-0",
+        "grid grid-cols-2 w-full gap-0",
         isMobile ? "overflow-x-auto scrollbar-hide" : "",
         className
       )}
@@ -34,10 +33,12 @@ const ResponsiveTabsTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       "flex-1 text-center whitespace-nowrap px-4 py-2 text-sm font-medium transition-all",
-      "border border-gray-200 first:rounded-l-md last:rounded-r-md",
+      "first:rounded-l-md last:rounded-r-md",
       "focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
       "data-[state=active]:bg-white data-[state=active]:text-foreground",
-      "data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground",
+      "data-[state=inactive]:bg-muted/50 data-[state=inactive]:text-muted-foreground",
+      "first:border-r last:border-l border-y border-gray-200",
+      "first:border-l last:border-r",
       className
     )}
     {...props}
