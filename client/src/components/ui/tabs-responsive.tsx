@@ -20,6 +20,7 @@ const ResponsiveTabsList = React.forwardRef<
         isMobile ? "overflow-x-auto scrollbar-hide" : "",
         className
       )}
+      style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(0, 1fr))" }}
       {...props}
     />
   );
