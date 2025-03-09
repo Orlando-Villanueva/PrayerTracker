@@ -73,7 +73,6 @@ export default function HomePage() {
             defaultValue="unbelievers"
             value={activeTab}
             onValueChange={setActiveTab}
-            className="w-full"
           >
             <div className="mb-4">
               <TabsList className="grid grid-cols-2 w-full">
@@ -81,23 +80,22 @@ export default function HomePage() {
                 <TabsTrigger value="brethren">Brethren in Hardship</TabsTrigger>
               </TabsList>
             </div>
+            <div className="mb-4">
+              <AddPrayerDialog category={activeTab}>
+                <Button
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center"
+                >
+                  <PlusCircle className="h-4 w-4 mr-1" />
+                  Add Prayer
+                </Button>
+              </AddPrayerDialog>
+            </div>
             <TabsContent value="unbelievers">
               <Card className="bg-red-50/30 dark:bg-red-950/10">
                 <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-red-700 dark:text-red-400">
-                      Unbelievers
-                    </CardTitle>
-                    <AddPrayerDialog category="unbelievers">
-                      <Button
-                        size="sm"
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                      >
-                        <PlusCircle className="h-4 w-4 mr-1" />
-                        Add Person
-                      </Button>
-                    </AddPrayerDialog>
-                  </div>
+                  <CardTitle className="text-red-700 dark:text-red-400">
+                    Unbelievers
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <PrayerList
@@ -111,20 +109,9 @@ export default function HomePage() {
             <TabsContent value="brethren">
               <Card className="border-2 border-blue-200 bg-blue-50/30 dark:bg-blue-950/10">
                 <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-blue-700 dark:text-blue-400">
-                      Brethren in Hardship
-                    </CardTitle>
-                    <AddPrayerDialog category="brethren">
-                      <Button
-                        size="sm"
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                      >
-                        <PlusCircle className="h-4 w-4 mr-1" />
-                        Add Person
-                      </Button>
-                    </AddPrayerDialog>
-                  </div>
+                  <CardTitle className="text-blue-700 dark:text-blue-400">
+                    Brethren in Hardship
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <PrayerList
