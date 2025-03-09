@@ -29,20 +29,11 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
-  // Use a stable session secret
-  const sessionSecret = process.env.SESSION_SECRET || randomBytes(32).toString('hex');
-
   const sessionSettings: session.SessionOptions = {
-    secret: sessionSecret,
-    resave: true, // Changed to true to ensure session is saved
-    saveUninitialized: true, // Changed to true to ensure new sessions are saved
+    secret: process.env.SESSION_SECRET!,
+    resave: false,
+    saveUninitialized: false,
     store: storage.sessionStore,
-    cookie: {
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      httpOnly: true
-    },
-    name: 'prayer-tracker-session'
   };
 
   app.set("trust proxy", 1);
@@ -52,62 +43,36 @@ export function setupAuth(app: Express) {
 
   passport.use(
     new LocalStrategy(async (username, password, done) => {
-      try {
-        const user = await storage.getUserByUsername(username);
-        if (!user || !(await comparePasswords(password, user.password))) {
-          return done(null, false);
-        }
+      const user = await storage.getUserByUsername(username);
+      if (!user || !(await comparePasswords(password, user.password))) {
+        return done(null, false);
+      } else {
         return done(null, user);
-      } catch (error) {
-        console.error('Authentication error:', error);
-        return done(error);
       }
     }),
   );
 
-  passport.serializeUser((user: Express.User, done) => {
-    try {
-      done(null, user.id);
-    } catch (error) {
-      console.error('Serialize error:', error);
-      done(error);
-    }
-  });
-
-  passport.deserializeUser(async (id: string, done) => {
-    try {
-      const user = await storage.getUser(id);
-      if (!user) {
-        console.error('User not found during deserialization:', id);
-        return done(null);
-      }
-      done(null, user);
-    } catch (error) {
-      console.error('Deserialize error:', error);
-      done(error);
-    }
+  passport.serializeUser((user, done) => done(null, user.id));
+  passport.deserializeUser(async (id: number, done) => {
+    const user = await storage.getUser(id);
+    done(null, user);
   });
 
   app.post("/api/register", async (req, res, next) => {
-    try {
-      const existingUser = await storage.getUserByUsername(req.body.username);
-      if (existingUser) {
-        return res.status(400).send("Username already exists");
-      }
-
-      const user = await storage.createUser({
-        ...req.body,
-        password: await hashPassword(req.body.password),
-      });
-
-      req.login(user, (err) => {
-        if (err) return next(err);
-        res.status(201).json(user);
-      });
-    } catch (error) {
-      console.error('Registration error:', error);
-      next(error);
+    const existingUser = await storage.getUserByUsername(req.body.username);
+    if (existingUser) {
+      return res.status(400).send("Username already exists");
     }
+
+    const user = await storage.createUser({
+      ...req.body,
+      password: await hashPassword(req.body.password),
+    });
+
+    req.login(user, (err) => {
+      if (err) return next(err);
+      res.status(201).json(user);
+    });
   });
 
   app.post("/api/login", passport.authenticate("local"), (req, res) => {
@@ -115,28 +80,10 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/logout", (req, res, next) => {
-    if (!req.isAuthenticated()) {
-      return res.sendStatus(200);
-    }
-
-    if (req.session) {
-      req.session.destroy((err) => {
-        if (err) {
-          console.error('Session destruction error:', err);
-          return next(err);
-        }
-        req.logout((err) => {
-          if (err) {
-            console.error('Logout error:', err);
-            return next(err);
-          }
-          res.clearCookie('prayer-tracker-session');
-          res.sendStatus(200);
-        });
-      });
-    } else {
+    req.logout((err) => {
+      if (err) return next(err);
       res.sendStatus(200);
-    }
+    });
   });
 
   app.get("/api/user", (req, res) => {

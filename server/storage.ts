@@ -1,169 +1,76 @@
-import { User, InsertUser, PrayerEntry, InsertPrayerEntry } from "@shared/schema";
-import Database from "@replit/database";
-import { randomUUID } from "crypto";
+import { PrayerEntry, InsertPrayerEntry, User, InsertUser } from "@shared/schema";
+import { users, prayerEntries } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 import session from "express-session";
-import MemoryStore from "memorystore";
+import connectPg from "connect-pg-simple";
+import { pool } from "./db";
 
-const MemorySession = MemoryStore(session);
-
-const db = new Database();
+const PostgresSessionStore = connectPg(session);
 
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
+  getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
 
   // Prayer entries
-  getPrayerEntries(userId: string): Promise<PrayerEntry[]>;
-  createPrayerEntry(userId: string, entry: InsertPrayerEntry): Promise<PrayerEntry>;
-  updatePrayerEntry(id: string, isResolved: boolean): Promise<PrayerEntry | undefined>;
-  deletePrayerEntry(id: string): Promise<void>;
+  getPrayerEntries(userId: number): Promise<PrayerEntry[]>;
+  createPrayerEntry(userId: number, entry: InsertPrayerEntry): Promise<PrayerEntry>;
+  updatePrayerEntry(id: number, isResolved: boolean): Promise<PrayerEntry | undefined>;
+  deletePrayerEntry(id: number): Promise<void>;
 
-  sessionStore: session.Store;
+  sessionStore: session.SessionStore;
 }
 
-export class ReplitStorage implements IStorage {
-  sessionStore: session.Store;
+export class DatabaseStorage implements IStorage {
+  sessionStore: session.SessionStore;
 
   constructor() {
-    this.sessionStore = new MemorySession({
-      checkPeriod: 86400000, // prune expired entries every 24h
-      stale: false,
-      ttl: 86400000 // 24 hours
+    this.sessionStore = new PostgresSessionStore({
+      pool,
+      createTableIfMissing: true,
     });
-    // Initialize collections if they don't exist
-    this.initializeCollections();
   }
 
-  private async initializeCollections() {
-    try {
-      const users = await db.get("users");
-      if (!users) {
-        await db.set("users", {});
-      }
-      const entries = await db.get("prayer_entries");
-      if (!entries) {
-        await db.set("prayer_entries", {});
-      }
-    } catch (error) {
-      console.error("Failed to initialize collections:", error);
-    }
-  }
-
-  private async getAllUsers(): Promise<Record<string, User>> {
-    try {
-      const users = await db.get("users");
-      return users ? (users as Record<string, User>) : {};
-    } catch (error) {
-      console.error("Failed to get users:", error);
-      return {};
-    }
-  }
-
-  private async getAllPrayerEntries(): Promise<Record<string, PrayerEntry>> {
-    try {
-      const entries = await db.get("prayer_entries");
-      return entries ? (entries as Record<string, PrayerEntry>) : {};
-    } catch (error) {
-      console.error("Failed to get prayer entries:", error);
-      return {};
-    }
-  }
-
-  async getUser(id: string): Promise<User | undefined> {
-    try {
-      const users = await this.getAllUsers();
-      return users[id];
-    } catch (error) {
-      console.error("Failed to get user:", error);
-      return undefined;
-    }
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    try {
-      const users = await this.getAllUsers();
-      if (!users) return undefined;
-      return Object.values(users).find(user => user && user.username === username);
-    } catch (error) {
-      console.error("Failed to get user by username:", error);
-      return undefined;
-    }
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    try {
-      const users = await this.getAllUsers();
-      const id = randomUUID();
-      const user: User = {
-        id,
-        ...insertUser
-      };
-      await db.set("users", { ...users, [id]: user });
-      return user;
-    } catch (error) {
-      console.error("Failed to create user:", error);
-      throw error;
-    }
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
   }
 
-  async getPrayerEntries(userId: string): Promise<PrayerEntry[]> {
-    try {
-      const entries = await this.getAllPrayerEntries();
-      return Object.values(entries).filter(entry => entry && entry.userId === userId);
-    } catch (error) {
-      console.error("Failed to get prayer entries:", error);
-      return [];
-    }
+  async getPrayerEntries(userId: number): Promise<PrayerEntry[]> {
+    return db.select().from(prayerEntries).where(eq(prayerEntries.userId, userId));
   }
 
-  async createPrayerEntry(userId: string, entry: InsertPrayerEntry): Promise<PrayerEntry> {
-    try {
-      const entries = await this.getAllPrayerEntries();
-      const id = randomUUID();
-      const prayerEntry: PrayerEntry = {
-        id,
-        userId,
-        ...entry,
-        isResolved: false,
-        createdAt: new Date().toISOString()
-      };
-      await db.set("prayer_entries", { ...entries, [id]: prayerEntry });
-      return prayerEntry;
-    } catch (error) {
-      console.error("Failed to create prayer entry:", error);
-      throw error;
-    }
+  async createPrayerEntry(userId: number, entry: InsertPrayerEntry): Promise<PrayerEntry> {
+    const [prayerEntry] = await db
+      .insert(prayerEntries)
+      .values({ ...entry, userId })
+      .returning();
+    return prayerEntry;
   }
 
-  async updatePrayerEntry(id: string, isResolved: boolean): Promise<PrayerEntry | undefined> {
-    try {
-      const entries = await this.getAllPrayerEntries();
-      const entry = entries[id];
-      if (!entry) return undefined;
-
-      const updatedEntry: PrayerEntry = {
-        ...entry,
-        isResolved
-      };
-      await db.set("prayer_entries", { ...entries, [id]: updatedEntry });
-      return updatedEntry;
-    } catch (error) {
-      console.error("Failed to update prayer entry:", error);
-      return undefined;
-    }
+  async updatePrayerEntry(id: number, isResolved: boolean): Promise<PrayerEntry | undefined> {
+    const [entry] = await db
+      .update(prayerEntries)
+      .set({ isResolved })
+      .where(eq(prayerEntries.id, id))
+      .returning();
+    return entry;
   }
 
-  async deletePrayerEntry(id: string): Promise<void> {
-    try {
-      const entries = await this.getAllPrayerEntries();
-      const { [id]: _, ...remainingEntries } = entries;
-      await db.set("prayer_entries", remainingEntries);
-    } catch (error) {
-      console.error("Failed to delete prayer entry:", error);
-      throw error;
-    }
+  async deletePrayerEntry(id: number): Promise<void> {
+    await db.delete(prayerEntries).where(eq(prayerEntries.id, id));
   }
 }
 
-export const storage = new ReplitStorage();
+export const storage = new DatabaseStorage();
