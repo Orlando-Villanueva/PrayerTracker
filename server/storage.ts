@@ -1,88 +1,76 @@
 import { PrayerEntry, InsertPrayerEntry, User, InsertUser } from "@shared/schema";
+import { users, prayerEntries } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 import session from "express-session";
-import createMemoryStore from "memorystore";
+import connectPg from "connect-pg-simple";
+import { pool } from "./db";
 
-const MemoryStore = createMemoryStore(session);
+const PostgresSessionStore = connectPg(session);
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  
+
   // Prayer entries
   getPrayerEntries(userId: number): Promise<PrayerEntry[]>;
   createPrayerEntry(userId: number, entry: InsertPrayerEntry): Promise<PrayerEntry>;
   updatePrayerEntry(id: number, isResolved: boolean): Promise<PrayerEntry | undefined>;
   deletePrayerEntry(id: number): Promise<void>;
-  
+
   sessionStore: session.SessionStore;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private prayerEntries: Map<number, PrayerEntry>;
-  private currentUserId: number;
-  private currentPrayerId: number;
+export class DatabaseStorage implements IStorage {
   sessionStore: session.SessionStore;
 
   constructor() {
-    this.users = new Map();
-    this.prayerEntries = new Map();
-    this.currentUserId = 1;
-    this.currentPrayerId = 1;
-    this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000,
+    this.sessionStore = new PostgresSessionStore({
+      pool,
+      createTableIfMissing: true,
     });
   }
 
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
 
   async getPrayerEntries(userId: number): Promise<PrayerEntry[]> {
-    return Array.from(this.prayerEntries.values()).filter(
-      (entry) => entry.userId === userId,
-    );
+    return db.select().from(prayerEntries).where(eq(prayerEntries.userId, userId));
   }
 
   async createPrayerEntry(userId: number, entry: InsertPrayerEntry): Promise<PrayerEntry> {
-    const id = this.currentPrayerId++;
-    const prayerEntry: PrayerEntry = {
-      ...entry,
-      id,
-      userId,
-      isResolved: false,
-      createdAt: new Date(),
-    };
-    this.prayerEntries.set(id, prayerEntry);
+    const [prayerEntry] = await db
+      .insert(prayerEntries)
+      .values({ ...entry, userId })
+      .returning();
     return prayerEntry;
   }
 
   async updatePrayerEntry(id: number, isResolved: boolean): Promise<PrayerEntry | undefined> {
-    const entry = this.prayerEntries.get(id);
-    if (!entry) return undefined;
-    
-    const updatedEntry = { ...entry, isResolved };
-    this.prayerEntries.set(id, updatedEntry);
-    return updatedEntry;
+    const [entry] = await db
+      .update(prayerEntries)
+      .set({ isResolved })
+      .where(eq(prayerEntries.id, id))
+      .returning();
+    return entry;
   }
 
   async deletePrayerEntry(id: number): Promise<void> {
-    this.prayerEntries.delete(id);
+    await db.delete(prayerEntries).where(eq(prayerEntries.id, id));
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
