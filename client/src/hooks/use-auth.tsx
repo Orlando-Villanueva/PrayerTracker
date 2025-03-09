@@ -38,6 +38,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
+      // Clear previous user's prayer data from cache
+      queryClient.invalidateQueries({ queryKey: ["/api/prayers"] });
     },
     onError: (error: Error) => {
       toast({
@@ -55,6 +57,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
+      // Clear any existing prayer data from cache
+      queryClient.invalidateQueries({ queryKey: ["/api/prayers"] });
     },
     onError: (error: Error) => {
       toast({
@@ -70,7 +74,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await apiRequest("POST", "/api/logout");
     },
     onSuccess: () => {
+      // Clear both user and prayer data from cache
       queryClient.setQueryData(["/api/user"], null);
+      queryClient.removeQueries({ queryKey: ["/api/prayers"] });
     },
     onError: (error: Error) => {
       toast({
