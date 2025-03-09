@@ -1,5 +1,5 @@
 
-# Prayer Journal
+# Prayer Tracker
 
 Prayer Journal is a full-stack web application built with TypeScript, React, Express, and PostgreSQL that allows users to track and manage their prayer requests. Users can create an account, add prayer entries, mark them as resolved, and delete them.
 
