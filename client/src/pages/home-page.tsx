@@ -50,13 +50,18 @@ export default function HomePage() {
           </div>
           <div className="flex flex-1 items-center justify-end space-x-2">
             {user && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => logoutMutation.mutate()}
-              >
-                Logout
-              </Button>
+              <>
+                <span className="text-sm text-muted-foreground mr-2">
+                  Welcome, {user.username}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => logoutMutation.mutate()}
+                >
+                  Logout
+                </Button>
+              </>
             )}
           </div>
         </div>
