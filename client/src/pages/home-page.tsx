@@ -28,11 +28,11 @@ export default function HomePage() {
   });
 
   const unbelieversPrayers = prayerEntries.filter(
-    (prayer) => prayer.category === "unbelievers"
+    (prayer) => prayer.category === "unbelievers",
   );
 
   const brethrenPrayers = prayerEntries.filter(
-    (prayer) => prayer.category === "brethren"
+    (prayer) => prayer.category === "brethren",
   );
 
   if (!user) {
@@ -44,7 +44,9 @@ export default function HomePage() {
       <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 max-w-screen-2xl items-center px-4">
           <div className="mr-4 flex items-center md:mr-6">
-            <strong className="font-semibold tracking-tight">Prayer Tracker</strong>
+            <strong className="font-semibold tracking-tight">
+              Prayer Tracker
+            </strong>
           </div>
           <div className="flex flex-1 items-center justify-end space-x-2">
             {user && (
@@ -62,19 +64,27 @@ export default function HomePage() {
 
       <main className="container mx-auto px-4 py-6 md:py-8 flex-1">
         {isMobile ? (
-          <Tabs defaultValue="unbelievers" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="w-full flex justify-center">
-              <TabsTrigger value="unbelievers">Unbelievers</TabsTrigger>
-              <TabsTrigger value="brethren">Brethren in Hardship</TabsTrigger>
-            </TabsList>
+          <Tabs
+            defaultValue="unbelievers"
+            value={activeTab}
+            onValueChange={setActiveTab}
+          >
+            <div className="flex mb-4">
+              <TabsList className="mx-auto">
+                <TabsTrigger value="unbelievers">Unbelievers</TabsTrigger>
+                <TabsTrigger value="brethren">Brethren in Hardship</TabsTrigger>
+              </TabsList>
+            </div>
             <TabsContent value="unbelievers">
-              <Card className="border-2 border-red-200 bg-red-50/30 dark:bg-red-950/10">
+              <Card className="bg-red-50/30 dark:bg-red-950/10">
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-red-700 dark:text-red-400">Unbelievers</CardTitle>
+                    <CardTitle className="text-red-700 dark:text-red-400">
+                      Unbelievers
+                    </CardTitle>
                     <AddPrayerDialog category="unbelievers">
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         className="bg-emerald-600 hover:bg-emerald-700 text-white"
                       >
                         <PlusCircle className="h-4 w-4 mr-1" />
@@ -96,10 +106,12 @@ export default function HomePage() {
               <Card className="border-2 border-blue-200 bg-blue-50/30 dark:bg-blue-950/10">
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-blue-700 dark:text-blue-400">Brethren in Hardship</CardTitle>
+                    <CardTitle className="text-blue-700 dark:text-blue-400">
+                      Brethren in Hardship
+                    </CardTitle>
                     <AddPrayerDialog category="brethren">
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         className="bg-emerald-600 hover:bg-emerald-700 text-white"
                       >
                         <PlusCircle className="h-4 w-4 mr-1" />
@@ -124,10 +136,12 @@ export default function HomePage() {
             <Card className="flex-1 border-2 border-red-200 bg-red-50/30 dark:bg-red-950/10">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-red-700 dark:text-red-400">Unbelievers</CardTitle>
+                  <CardTitle className="text-red-700 dark:text-red-400">
+                    Unbelievers
+                  </CardTitle>
                   <AddPrayerDialog category="unbelievers">
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       className="bg-emerald-600 hover:bg-emerald-700 text-white"
                     >
                       <PlusCircle className="h-4 w-4 mr-1" />
@@ -149,10 +163,12 @@ export default function HomePage() {
             <Card className="flex-1 border-2 border-blue-200 bg-blue-50/30 dark:bg-blue-950/10">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-blue-700 dark:text-blue-400">Brethren in Hardship</CardTitle>
+                  <CardTitle className="text-blue-700 dark:text-blue-400">
+                    Brethren in Hardship
+                  </CardTitle>
                   <AddPrayerDialog category="brethren">
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       className="bg-emerald-600 hover:bg-emerald-700 text-white"
                     >
                       <PlusCircle className="h-4 w-4 mr-1" />
