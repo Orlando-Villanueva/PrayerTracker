@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle, Trash2 } from "lucide-react";
 import type { PrayerEntry } from "@shared/schema";
@@ -45,17 +45,23 @@ export function PrayerEntryCard({ entry }: PrayerEntryProps) {
   });
 
   return (
-    <Card className={entry.isResolved ? "opacity-75" : ""}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className={`text-xl ${entry.isResolved ? "line-through" : ""}`}>
-          {entry.name}
-        </CardTitle>
-        <div className="flex gap-2">
+    <Card className={`${entry.isResolved ? "opacity-75" : ""} hover:shadow-md transition-shadow`}>
+      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-3 gap-4">
+        <div className="flex-1">
+          <h3 className={`text-xl font-medium ${entry.isResolved ? "line-through" : ""}`}>
+            {entry.name}
+          </h3>
+          <p className="text-sm text-muted-foreground mt-1 break-words">
+            {entry.description}
+          </p>
+        </div>
+        <div className="flex gap-2 shrink-0">
           <Button
             variant="ghost"
-            size="icon"
+            size="sm"
             onClick={() => toggleResolved.mutate()}
             disabled={toggleResolved.isPending}
+            className="h-9 w-9"
           >
             {entry.isResolved ? (
               <XCircle className="h-5 w-5 text-muted-foreground" />
@@ -65,7 +71,7 @@ export function PrayerEntryCard({ entry }: PrayerEntryProps) {
           </Button>
           <AlertDialog open={showDelete} onOpenChange={setShowDelete}>
             <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="sm" className="h-9 w-9">
                 <Trash2 className="h-5 w-5 text-destructive" />
               </Button>
             </AlertDialogTrigger>
@@ -89,9 +95,6 @@ export function PrayerEntryCard({ entry }: PrayerEntryProps) {
           </AlertDialog>
         </div>
       </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground">{entry.description}</p>
-      </CardContent>
     </Card>
   );
 }

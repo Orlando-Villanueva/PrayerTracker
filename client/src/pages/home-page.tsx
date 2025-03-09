@@ -20,44 +20,53 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Cross className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-semibold">Prayer Tracker</h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-muted-foreground">Welcome, {user?.username}</span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => logoutMutation.mutate()}
-              disabled={logoutMutation.isPending}
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
+      <header className="border-b py-3 md:py-0">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row md:h-16 md:items-center justify-between gap-4 md:gap-0">
+            <div className="flex items-center gap-3">
+              <Cross className="h-6 w-6 text-primary" />
+              <h1 className="text-xl font-semibold">Prayer Tracker</h1>
+            </div>
+            <div className="flex items-center justify-between md:gap-4">
+              <span className="text-muted-foreground">Welcome, {user?.username}</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => logoutMutation.mutate()}
+                disabled={logoutMutation.isPending}
+                className="ml-4"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <Tabs value={selectedCategory} onValueChange={(v: "unbelievers" | "brethren") => setSelectedCategory(v)}>
-            <TabsList>
-              <TabsTrigger value="unbelievers">Unbelievers</TabsTrigger>
-              <TabsTrigger value="brethren">Brethren in Hardship</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <AddPrayerDialog category={selectedCategory} />
-        </div>
+      <main className="container mx-auto px-4 py-6 md:py-8">
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <Tabs 
+              value={selectedCategory} 
+              onValueChange={(v: "unbelievers" | "brethren") => setSelectedCategory(v)}
+              className="w-full md:w-auto"
+            >
+              <TabsList className="w-full md:w-auto grid grid-cols-2">
+                <TabsTrigger value="unbelievers" className="px-6">Unbelievers</TabsTrigger>
+                <TabsTrigger value="brethren" className="px-6">Brethren in Hardship</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <AddPrayerDialog category={selectedCategory} />
+          </div>
 
-        <div className="grid gap-6">
-          <PrayerList
-            prayers={filteredPrayers}
-            isLoading={isLoading}
-            category={selectedCategory}
-          />
+          <div className="grid gap-6">
+            <PrayerList
+              prayers={filteredPrayers}
+              isLoading={isLoading}
+              category={selectedCategory}
+            />
+          </div>
         </div>
       </main>
     </div>
