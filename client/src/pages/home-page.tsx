@@ -82,11 +82,9 @@ export default function HomePage() {
             </div>
             <div className="mb-4">
               <AddPrayerDialog category={activeTab}>
-                <Button
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center"
-                >
+                <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center">
                   <PlusCircle className="h-4 w-4 mr-1" />
-                  Add Prayer
+                  <span>Add Prayer</span>
                 </Button>
               </AddPrayerDialog>
             </div>
