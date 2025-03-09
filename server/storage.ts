@@ -29,16 +29,43 @@ export class ReplitStorage implements IStorage {
     this.sessionStore = new MemorySession({
       checkPeriod: 86400000 // prune expired entries every 24h
     });
+    // Initialize collections if they don't exist
+    this.initializeCollections();
+  }
+
+  private async initializeCollections() {
+    try {
+      const users = await db.get("users");
+      if (!users) {
+        await db.set("users", {});
+      }
+      const entries = await db.get("prayer_entries");
+      if (!entries) {
+        await db.set("prayer_entries", {});
+      }
+    } catch (error) {
+      console.error("Failed to initialize collections:", error);
+    }
   }
 
   private async getAllUsers(): Promise<Record<string, User>> {
-    const users = await db.get("users") || {};
-    return users;
+    try {
+      const users = await db.get("users");
+      return users ? (users as Record<string, User>) : {};
+    } catch (error) {
+      console.error("Failed to get users:", error);
+      return {};
+    }
   }
 
   private async getAllPrayerEntries(): Promise<Record<string, PrayerEntry>> {
-    const entries = await db.get("prayer_entries") || {};
-    return entries;
+    try {
+      const entries = await db.get("prayer_entries");
+      return entries ? (entries as Record<string, PrayerEntry>) : {};
+    } catch (error) {
+      console.error("Failed to get prayer entries:", error);
+      return {};
+    }
   }
 
   async getUser(id: string): Promise<User | undefined> {
@@ -48,7 +75,8 @@ export class ReplitStorage implements IStorage {
 
   async getUserByUsername(username: string): Promise<User | undefined> {
     const users = await this.getAllUsers();
-    return Object.values(users).find(user => user.username === username);
+    if (!users) return undefined;
+    return Object.values(users).find(user => user && user.username === username);
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
@@ -64,7 +92,7 @@ export class ReplitStorage implements IStorage {
 
   async getPrayerEntries(userId: string): Promise<PrayerEntry[]> {
     const entries = await this.getAllPrayerEntries();
-    return Object.values(entries).filter(entry => entry.userId === userId);
+    return Object.values(entries).filter(entry => entry && entry.userId === userId);
   }
 
   async createPrayerEntry(userId: string, entry: InsertPrayerEntry): Promise<PrayerEntry> {
