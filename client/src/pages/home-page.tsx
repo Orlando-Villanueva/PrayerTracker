@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
@@ -64,7 +63,7 @@ export default function HomePage() {
       <main className="container mx-auto px-4 py-6 md:py-8 flex-1">
         {isMobile ? (
           <Tabs defaultValue="unbelievers" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-4">
+            <TabsList className="w-full flex justify-center">
               <TabsTrigger value="unbelievers">Unbelievers</TabsTrigger>
               <TabsTrigger value="brethren">Brethren in Hardship</TabsTrigger>
             </TabsList>
