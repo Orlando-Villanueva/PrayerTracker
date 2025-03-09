@@ -27,7 +27,8 @@ export class ReplitStorage implements IStorage {
 
   constructor() {
     this.sessionStore = new MemorySession({
-      checkPeriod: 86400000 // prune expired entries every 24h
+      checkPeriod: 86400000, // prune expired entries every 24h
+      stale: false
     });
     // Initialize collections if they don't exist
     this.initializeCollections();
@@ -69,63 +70,98 @@ export class ReplitStorage implements IStorage {
   }
 
   async getUser(id: string): Promise<User | undefined> {
-    const users = await this.getAllUsers();
-    return users[id];
+    try {
+      const users = await this.getAllUsers();
+      return users[id];
+    } catch (error) {
+      console.error("Failed to get user:", error);
+      return undefined;
+    }
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const users = await this.getAllUsers();
-    if (!users) return undefined;
-    return Object.values(users).find(user => user && user.username === username);
+    try {
+      const users = await this.getAllUsers();
+      if (!users) return undefined;
+      return Object.values(users).find(user => user && user.username === username);
+    } catch (error) {
+      console.error("Failed to get user by username:", error);
+      return undefined;
+    }
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const users = await this.getAllUsers();
-    const id = randomUUID();
-    const user: User = {
-      id,
-      ...insertUser
-    };
-    await db.set("users", { ...users, [id]: user });
-    return user;
+    try {
+      const users = await this.getAllUsers();
+      const id = randomUUID();
+      const user: User = {
+        id,
+        ...insertUser
+      };
+      await db.set("users", { ...users, [id]: user });
+      return user;
+    } catch (error) {
+      console.error("Failed to create user:", error);
+      throw error;
+    }
   }
 
   async getPrayerEntries(userId: string): Promise<PrayerEntry[]> {
-    const entries = await this.getAllPrayerEntries();
-    return Object.values(entries).filter(entry => entry && entry.userId === userId);
+    try {
+      const entries = await this.getAllPrayerEntries();
+      return Object.values(entries).filter(entry => entry && entry.userId === userId);
+    } catch (error) {
+      console.error("Failed to get prayer entries:", error);
+      return [];
+    }
   }
 
   async createPrayerEntry(userId: string, entry: InsertPrayerEntry): Promise<PrayerEntry> {
-    const entries = await this.getAllPrayerEntries();
-    const id = randomUUID();
-    const prayerEntry: PrayerEntry = {
-      id,
-      userId,
-      ...entry,
-      isResolved: false,
-      createdAt: new Date().toISOString()
-    };
-    await db.set("prayer_entries", { ...entries, [id]: prayerEntry });
-    return prayerEntry;
+    try {
+      const entries = await this.getAllPrayerEntries();
+      const id = randomUUID();
+      const prayerEntry: PrayerEntry = {
+        id,
+        userId,
+        ...entry,
+        isResolved: false,
+        createdAt: new Date().toISOString()
+      };
+      await db.set("prayer_entries", { ...entries, [id]: prayerEntry });
+      return prayerEntry;
+    } catch (error) {
+      console.error("Failed to create prayer entry:", error);
+      throw error;
+    }
   }
 
   async updatePrayerEntry(id: string, isResolved: boolean): Promise<PrayerEntry | undefined> {
-    const entries = await this.getAllPrayerEntries();
-    const entry = entries[id];
-    if (!entry) return undefined;
+    try {
+      const entries = await this.getAllPrayerEntries();
+      const entry = entries[id];
+      if (!entry) return undefined;
 
-    const updatedEntry: PrayerEntry = {
-      ...entry,
-      isResolved
-    };
-    await db.set("prayer_entries", { ...entries, [id]: updatedEntry });
-    return updatedEntry;
+      const updatedEntry: PrayerEntry = {
+        ...entry,
+        isResolved
+      };
+      await db.set("prayer_entries", { ...entries, [id]: updatedEntry });
+      return updatedEntry;
+    } catch (error) {
+      console.error("Failed to update prayer entry:", error);
+      return undefined;
+    }
   }
 
   async deletePrayerEntry(id: string): Promise<void> {
-    const entries = await this.getAllPrayerEntries();
-    const { [id]: _, ...remainingEntries } = entries;
-    await db.set("prayer_entries", remainingEntries);
+    try {
+      const entries = await this.getAllPrayerEntries();
+      const { [id]: _, ...remainingEntries } = entries;
+      await db.set("prayer_entries", remainingEntries);
+    } catch (error) {
+      console.error("Failed to delete prayer entry:", error);
+      throw error;
+    }
   }
 }
 
