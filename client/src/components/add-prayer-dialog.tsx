@@ -27,9 +27,10 @@ import { insertPrayerEntrySchema, type InsertPrayerEntry } from "@shared/schema"
 
 interface AddPrayerDialogProps {
   category: "unbelievers" | "brethren";
+  children?: React.ReactNode;
 }
 
-export function AddPrayerDialog({ category }: AddPrayerDialogProps) {
+export function AddPrayerDialog({ category, children }: AddPrayerDialogProps) {
   const [open, setOpen] = useState(false);
 
   const form = useForm<InsertPrayerEntry>({
@@ -55,10 +56,12 @@ export function AddPrayerDialog({ category }: AddPrayerDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Prayer
-        </Button>
+        {children || (
+          <Button>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Prayer
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
