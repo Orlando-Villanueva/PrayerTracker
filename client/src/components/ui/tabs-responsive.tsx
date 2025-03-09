@@ -33,7 +33,7 @@ const ResponsiveTabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap px-4 py-3 text-sm font-medium border-b-2 border-transparent transition-all",
+      "inline-flex items-center justify-center whitespace-nowrap px-4 py-3 text-sm font-medium border-b-2 border-transparent transition-all flex-1",
       "focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
       "data-[state=active]:border-primary data-[state=active]:text-foreground",
       className
