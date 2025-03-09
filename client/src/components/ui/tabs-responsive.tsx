@@ -16,11 +16,10 @@ const ResponsiveTabsList = React.forwardRef<
     <TabsPrimitive.List
       ref={ref}
       className={cn(
-        "flex w-full border-b",
+        "grid w-full border-b grid-cols-2",
         isMobile ? "overflow-x-auto scrollbar-hide" : "",
         className
       )}
-      style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(0, 1fr))" }}
       {...props}
     />
   );
