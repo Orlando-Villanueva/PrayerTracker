@@ -36,7 +36,7 @@ const ResponsiveTabsTrigger = React.forwardRef<
       "inline-flex items-center justify-center whitespace-nowrap px-4 py-2 text-sm font-medium transition-all flex-1",
       "border border-gray-200 first:rounded-l-md last:rounded-r-md",
       "focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
-      "data-[state=active]:bg-muted data-[state=inactive]:bg-white",
+      "data-[state=active]:bg-white data-[state=inactive]:bg-muted",
       className
     )}
     {...props}
