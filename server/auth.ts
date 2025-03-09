@@ -29,15 +29,20 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
+  // Use a stable session secret
+  const sessionSecret = process.env.SESSION_SECRET || randomBytes(32).toString('hex');
+
   const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET || 'your-secret-key',
-    resave: false,
-    saveUninitialized: false,
+    secret: sessionSecret,
+    resave: true, // Changed to true to ensure session is saved
+    saveUninitialized: true, // Changed to true to ensure new sessions are saved
     store: storage.sessionStore,
     cookie: {
       secure: process.env.NODE_ENV === "production",
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    }
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      httpOnly: true
+    },
+    name: 'prayer-tracker-session'
   };
 
   app.set("trust proxy", 1);
@@ -54,20 +59,30 @@ export function setupAuth(app: Express) {
         }
         return done(null, user);
       } catch (error) {
+        console.error('Authentication error:', error);
         return done(error);
       }
     }),
   );
 
-  passport.serializeUser((user, done) => {
-    done(null, user.id);
+  passport.serializeUser((user: Express.User, done) => {
+    try {
+      done(null, user.id);
+    } catch (error) {
+      console.error('Serialize error:', error);
+      done(error);
+    }
   });
 
   passport.deserializeUser(async (id: string, done) => {
     try {
       const user = await storage.getUser(id);
+      if (!user) {
+        return done(new Error('User not found'), null);
+      }
       done(null, user);
     } catch (error) {
+      console.error('Deserialize error:', error);
       done(error);
     }
   });
@@ -89,6 +104,7 @@ export function setupAuth(app: Express) {
         res.status(201).json(user);
       });
     } catch (error) {
+      console.error('Registration error:', error);
       next(error);
     }
   });
@@ -99,8 +115,17 @@ export function setupAuth(app: Express) {
 
   app.post("/api/logout", (req, res, next) => {
     req.logout((err) => {
-      if (err) return next(err);
-      res.sendStatus(200);
+      if (err) {
+        console.error('Logout error:', err);
+        return next(err);
+      }
+      req.session.destroy((err) => {
+        if (err) {
+          console.error('Session destruction error:', err);
+          return next(err);
+        }
+        res.sendStatus(200);
+      });
     });
   });
 
