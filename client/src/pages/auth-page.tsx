@@ -42,6 +42,14 @@ export default function AuthPage() {
     defaultValues: { username: "", password: "" },
   });
 
+  const handleLoginSubmit = (data: InsertUser) => {
+    loginMutation.mutate({...data, username: data.username.toLowerCase()});
+  };
+
+  const handleRegisterSubmit = (data: InsertUser) => {
+    registerMutation.mutate({...data, username: data.username.toLowerCase()});
+  };
+
   return (
     <div className="min-h-screen grid md:grid-cols-2">
       <div className="flex items-center justify-center p-8">
@@ -65,9 +73,7 @@ export default function AuthPage() {
               <TabsContent value="login">
                 <Form {...loginForm}>
                   <form
-                    onSubmit={loginForm.handleSubmit((data) =>
-                      loginMutation.mutate(data)
-                    )}
+                    onSubmit={loginForm.handleSubmit(handleLoginSubmit)}
                     className="space-y-4"
                   >
                     <FormField
@@ -110,9 +116,7 @@ export default function AuthPage() {
               <TabsContent value="register">
                 <Form {...registerForm}>
                   <form
-                    onSubmit={registerForm.handleSubmit((data) =>
-                      registerMutation.mutate(data)
-                    )}
+                    onSubmit={registerForm.handleSubmit(handleRegisterSubmit)}
                     className="space-y-4"
                   >
                     <FormField
