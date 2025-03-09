@@ -133,7 +133,7 @@ export default function HomePage() {
                   <AddPrayerDialog category="unbelievers">
                     <Button
                       size="sm"
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                      className="bg-[hsl(220_16%_22%)] hover:bg-[hsl(220_16%_18%)] text-white"
                     >
                       <PlusCircle className="h-4 w-4 mr-1" />
                       Add Person
@@ -160,7 +160,7 @@ export default function HomePage() {
                   <AddPrayerDialog category="brethren">
                     <Button
                       size="sm"
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                      className="bg-[hsl(220_16%_22%)] hover:bg-[hsl(220_16%_18%)] text-white"
                     >
                       <PlusCircle className="h-4 w-4 mr-1" />
                       Add Person
