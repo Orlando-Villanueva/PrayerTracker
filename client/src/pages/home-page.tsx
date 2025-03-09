@@ -82,9 +82,16 @@ export default function HomePage() {
             </div>
             <div className="mb-4">
               <AddPrayerDialog category={activeTab}>
-                <Button className="w-full bg-[hsl(220_16%_22%)] hover:bg-[hsl(220_16%_18%)] text-white flex items-center justify-center">
+                <Button 
+                  variant="outline" 
+                  className={`w-full flex items-center justify-center
+                    ${activeTab === "unbelievers" 
+                      ? "text-red-700 dark:text-red-400 border-red-200 dark:border-red-800 hover:bg-red-100 hover:text-red-800 dark:hover:bg-red-950 dark:hover:text-red-300" 
+                      : "text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800 hover:bg-blue-100 hover:text-blue-800 dark:hover:bg-blue-950 dark:hover:text-blue-300"
+                    }`}
+                >
                   <PlusCircle className="h-4 w-4 mr-1" />
-                  <span>Add Prayer</span>
+                  <span>Add Person</span>
                 </Button>
               </AddPrayerDialog>
             </div>
@@ -126,22 +133,23 @@ export default function HomePage() {
             {/* Unbelievers Section - Red-ish Theme */}
             <Card className="flex-1 border-2 border-red-200 bg-red-50/30 dark:bg-red-950/10">
               <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-red-700 dark:text-red-400">
-                    Unbelievers
-                  </CardTitle>
+                <CardTitle className="text-red-700 dark:text-red-400 flex items-center gap-2">
+                  Unbelievers
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-4 flex justify-end">
                   <AddPrayerDialog category="unbelievers">
                     <Button
                       size="sm"
-                      className="bg-[hsl(220_16%_22%)] hover:bg-[hsl(220_16%_18%)] text-white"
+                      variant="outline"
+                      className="text-red-700 dark:text-red-400 border-red-200 dark:border-red-800 hover:bg-red-100 hover:text-red-800 dark:hover:bg-red-950 dark:hover:text-red-300"
                     >
                       <PlusCircle className="h-4 w-4 mr-1" />
                       Add Person
                     </Button>
                   </AddPrayerDialog>
                 </div>
-              </CardHeader>
-              <CardContent>
                 <PrayerList
                   prayers={unbelieversPrayers}
                   isLoading={isLoading}
@@ -153,22 +161,23 @@ export default function HomePage() {
             {/* Brethren Section - Blue-ish Theme */}
             <Card className="flex-1 border-2 border-blue-200 bg-blue-50/30 dark:bg-blue-950/10">
               <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-blue-700 dark:text-blue-400">
-                    Brethren in Hardship
-                  </CardTitle>
+                <CardTitle className="text-blue-700 dark:text-blue-400 flex items-center gap-2">
+                  Brethren in Hardship
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-4 flex justify-end">
                   <AddPrayerDialog category="brethren">
                     <Button
                       size="sm"
-                      className="bg-[hsl(220_16%_22%)] hover:bg-[hsl(220_16%_18%)] text-white"
+                      variant="outline"
+                      className="text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800 hover:bg-blue-100 hover:text-blue-800 dark:hover:bg-blue-950 dark:hover:text-blue-300"
                     >
                       <PlusCircle className="h-4 w-4 mr-1" />
                       Add Person
                     </Button>
                   </AddPrayerDialog>
                 </div>
-              </CardHeader>
-              <CardContent>
                 <PrayerList
                   prayers={brethrenPrayers}
                   isLoading={isLoading}
