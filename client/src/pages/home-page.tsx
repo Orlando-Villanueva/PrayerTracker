@@ -73,9 +73,10 @@ export default function HomePage() {
             defaultValue="unbelievers"
             value={activeTab}
             onValueChange={setActiveTab}
+            className="w-full"
           >
             <div className="mb-4">
-              <TabsList className="w-full">
+              <TabsList className="grid grid-cols-2 w-full">
                 <TabsTrigger value="unbelievers">Unbelievers</TabsTrigger>
                 <TabsTrigger value="brethren">Brethren in Hardship</TabsTrigger>
               </TabsList>

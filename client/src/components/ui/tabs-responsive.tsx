@@ -15,7 +15,7 @@ const ResponsiveTabsList = React.forwardRef<
     <TabsPrimitive.List
       ref={ref}
       className={cn(
-        "grid grid-cols-2 w-full gap-0",
+        "flex w-full rounded-md bg-muted/30",
         isMobile ? "overflow-x-auto scrollbar-hide" : "",
         className
       )}
@@ -32,13 +32,11 @@ const ResponsiveTabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex-1 text-center whitespace-nowrap px-4 py-2 text-sm font-medium transition-all",
+      "inline-flex w-full items-center justify-center whitespace-nowrap px-3 py-1 text-sm text-muted-foreground transition-all",
+      "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-[0_1px_1px_rgba(0,0,0,0.1)]",
+      "data-[state=inactive]:hover:bg-muted/40",
       "first:rounded-l-md last:rounded-r-md",
-      "focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
-      "data-[state=active]:bg-white data-[state=active]:text-foreground",
-      "data-[state=inactive]:bg-muted/50 data-[state=inactive]:text-muted-foreground",
-      "first:border-r last:border-l border-y border-gray-200",
-      "first:border-l last:border-r",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
       className
     )}
     {...props}
@@ -53,7 +51,7 @@ const ResponsiveTabsContent = React.forwardRef<
   <TabsPrimitive.Content
     ref={ref}
     className={cn(
-      "mt-2 focus-visible:outline-none",
+      "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
       className
     )}
     {...props}
