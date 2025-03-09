@@ -16,7 +16,7 @@ const ResponsiveTabsList = React.forwardRef<
     <TabsPrimitive.List
       ref={ref}
       className={cn(
-        "flex w-full",
+        "flex w-full gap-0",
         isMobile ? "overflow-x-auto scrollbar-hide" : "",
         className
       )}
@@ -33,10 +33,11 @@ const ResponsiveTabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap px-4 py-2 text-sm font-medium transition-all flex-1",
+      "flex-1 text-center whitespace-nowrap px-4 py-2 text-sm font-medium transition-all",
       "border border-gray-200 first:rounded-l-md last:rounded-r-md",
       "focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
-      "data-[state=active]:bg-white data-[state=inactive]:bg-muted",
+      "data-[state=active]:bg-white data-[state=active]:text-foreground",
+      "data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground",
       className
     )}
     {...props}
