@@ -1,8 +1,14 @@
 
 import React, { useState, useEffect } from "react";
 import { Prayer } from "@/shared/schema";
+
+import { PlusIcon } from "lucide-react";
+
 import { useUser } from "@/contexts/UserContext";
 import { useApi } from "@/hooks/use-api";
+
+import { Button } from "@/components/ui/button";
+
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PrayerItem } from "@/components/PrayerItem";
 import { MobileHeader } from "@/components/MobileHeader";
@@ -76,6 +82,16 @@ export default function Dashboard() {
       <MobileHeader onAddPrayer={() => setIsFormOpen(true)} />
       
       <div className="flex-1 container max-w-3xl py-2 px-4">
+        <div className="md:hidden mb-4">
+          <Button 
+            className="w-full bg-[hsl(220_16%_22%)] hover:bg-[hsl(220_16%_18%)] text-white"
+            onClick={() => setIsFormOpen(true)}
+          >
+            <PlusIcon className="h-4 w-4 mr-1" />
+            Add Prayer
+          </Button>
+        </div>
+        
         <ResponsiveTabs value={activeTab} onValueChange={setActiveTab}>
           <ResponsiveTabsList>
             <ResponsiveTabsTrigger value="all">
