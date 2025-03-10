@@ -19,7 +19,7 @@ export default function HomePage() {
   const { data: prayerEntries = [], isLoading } = useQuery({
     queryKey: [PRAYERS_QUERY_KEY],
     queryFn: async () => {
-      const response = await fetch("/api/prayers"); //The edited snippet incorrectly tries to use PRAYERS_QUERY_KEY as the URL.  The URL should remain /api/prayers.
+      const response = await fetch("/api/prayers");
       if (!response.ok) {
         throw new Error("Failed to fetch prayers");
       }
@@ -98,7 +98,7 @@ export default function HomePage() {
               </AddPrayerDialog>
             </div>
             <TabsContent value="unbelievers">
-              <Card className="bg-red-50/30 dark:bg-red-950/10">
+              <Card className="bg-red-50/30 dark:bg-red-950/10 border-2 border-red-200 dark:border-red-800">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-red-700 dark:text-red-400 mb-4">
                     Unbelievers
@@ -114,7 +114,7 @@ export default function HomePage() {
               </Card>
             </TabsContent>
             <TabsContent value="brethren">
-              <Card className="bg-blue-50/30 dark:bg-blue-950/10">
+              <Card className="bg-blue-50/30 dark:bg-blue-950/10 border-2 border-blue-200 dark:border-blue-800">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-blue-700 dark:text-blue-400 mb-4">
                     Brethren in Hardship
