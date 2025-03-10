@@ -82,12 +82,13 @@ export default function HomePage() {
             </div>
             <div className="mb-4">
               <AddPrayerDialog category={activeTab}>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className={`w-full flex items-center justify-center
-                    ${activeTab === "unbelievers" 
-                      ? "text-red-700 dark:text-red-400 border-red-200 dark:border-red-800 hover:bg-red-100 hover:text-red-800 dark:hover:bg-red-950 dark:hover:text-red-300" 
-                      : "text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800 hover:bg-blue-100 hover:text-blue-800 dark:hover:bg-blue-950 dark:hover:text-blue-300"
+                    ${
+                      activeTab === "unbelievers"
+                        ? "text-red-700 dark:text-red-400 border-red-200 dark:border-red-800 hover:bg-red-100 hover:text-red-800 dark:hover:bg-red-950 dark:hover:text-red-300"
+                        : "text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800 hover:bg-blue-100 hover:text-blue-800 dark:hover:bg-blue-950 dark:hover:text-blue-300"
                     }`}
                 >
                   <PlusCircle className="h-4 w-4 mr-1" />
@@ -98,7 +99,7 @@ export default function HomePage() {
             <TabsContent value="unbelievers">
               <Card className="bg-red-50/30 dark:bg-red-950/10">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-red-700 dark:text-red-400">
+                  <CardTitle className="text-red-700 dark:text-red-400 mb-4">
                     Unbelievers
                   </CardTitle>
                 </CardHeader>
@@ -112,9 +113,9 @@ export default function HomePage() {
               </Card>
             </TabsContent>
             <TabsContent value="brethren">
-              <Card className="border-2 border-blue-200 bg-blue-50/30 dark:bg-blue-950/10">
+              <Card className="bg-blue-50/30 dark:bg-blue-950/10">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-blue-700 dark:text-blue-400">
+                  <CardTitle className="text-blue-700 dark:text-blue-400 mb-4">
                     Brethren in Hardship
                   </CardTitle>
                 </CardHeader>
