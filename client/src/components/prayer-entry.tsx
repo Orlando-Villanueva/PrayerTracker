@@ -28,7 +28,7 @@ export function PrayerEntryCard({ entry }: PrayerEntryCardProps) {
   const togglePrayer = useMutation({
     mutationFn: async () => {
       await apiRequest("PATCH", `/api/prayers/${entry.id}`, {
-        isAnswered: !entry.isAnswered,
+        isResolved: !entry.isAnswered,
       });
     },
     onMutate: async () => {
