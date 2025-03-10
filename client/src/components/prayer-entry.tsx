@@ -105,7 +105,11 @@ export function PrayerEntryCard({ entry }: PrayerEntryCardProps) {
           onClick={() => togglePrayer.mutate()}
           disabled={togglePrayer.isPending}
         >
-          <CheckCircle className="h-4 w-4" />
+          {entry.isResolved ? (
+            <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+          ) : (
+            <CheckCircle className="h-4 w-4" />
+          )}
         </Button>
 
         <AlertDialog open={open} onOpenChange={setOpen}>
