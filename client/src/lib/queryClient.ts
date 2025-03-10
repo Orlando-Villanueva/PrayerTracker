@@ -1,57 +1,53 @@
-import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
-async function throwIfResNotOk(res: Response) {
-  if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
-  }
-}
+import { QueryClient } from "@tanstack/react-query";
 
-export async function apiRequest(
-  method: string,
-  url: string,
-  data?: unknown | undefined,
-): Promise<Response> {
-  const res = await fetch(url, {
-    method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
-  });
-
-  await throwIfResNotOk(res);
-  return res;
-}
-
-type UnauthorizedBehavior = "returnNull" | "throw";
-export const getQueryFn: <T>(options: {
-  on401: UnauthorizedBehavior;
-}) => QueryFunction<T> =
-  ({ on401: unauthorizedBehavior }) =>
-  async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
-      credentials: "include",
-    });
-
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
-    }
-
-    await throwIfResNotOk(res);
-    return await res.json();
-  };
+// Configure with your Laravel backend URL
+const API_BASE_URL = "https://your-laravel-app-url.repl.co/api";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: getQueryFn({ on401: "throw" }),
-      refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
-      retry: false,
-    },
-    mutations: {
-      retry: false,
     },
   },
 });
+
+type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
+export async function apiRequest<T = any>(
+  method: HttpMethod,
+  endpoint: string,
+  data?: any
+): Promise<T> {
+  const url = `${API_BASE_URL}${endpoint}`;
+  
+  const options: RequestInit = {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      // Laravel uses CSRF protection, you might need to include a token
+      // "X-CSRF-TOKEN": csrfToken,
+    },
+    credentials: "include", // For cookies/session auth
+  };
+
+  if (data) {
+    options.body = JSON.stringify(data);
+  }
+
+  const response = await fetch(url, options);
+  
+  // Handle non-2xx responses
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "An error occurred");
+  }
+  
+  // For DELETE requests that might return empty responses
+  if (response.status === 204) {
+    return {} as T;
+  }
+  
+  return response.json();
+}
