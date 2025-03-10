@@ -28,7 +28,7 @@ export function PrayerEntryCard({ entry }: PrayerEntryCardProps) {
   const togglePrayer = useMutation({
     mutationFn: async () => {
       await apiRequest("PATCH", `/api/prayers/${entry.id}`, {
-        isResolved: !entry.isAnswered,
+        isResolved: !entry.isResolved, // Changed to isResolved
       });
     },
     onMutate: async () => {
@@ -38,7 +38,7 @@ export function PrayerEntryCard({ entry }: PrayerEntryCardProps) {
       queryClient.setQueryData([PRAYERS_QUERY_KEY], (old: any) => {
         return old.map((prayer: PrayerEntry) =>
           prayer.id === entry.id
-            ? { ...prayer, isAnswered: !prayer.isAnswered }
+            ? { ...prayer, isResolved: !prayer.isResolved } // Changed to isResolved
             : prayer,
         );
       });
@@ -87,13 +87,15 @@ export function PrayerEntryCard({ entry }: PrayerEntryCardProps) {
   return (
     <div className="flex items-center justify-between py-3 px-4 border rounded-lg bg-background transition-colors shadow-sm mb-2">
       <div className="flex-1 min-w-0">
-        <h4 className="font-medium truncate">{entry.name}</h4>
-        {entry.description && (
-          <p className="text-xs text-muted-foreground truncate">
-            {entry.description}
-          </p>
-        )}
-      </div>
+          <h4 className={`font-medium truncate ${entry.isResolved ? 'line-through text-muted-foreground' : ''}`}>
+            {entry.name}
+          </h4>
+          {entry.description && (
+            <p className={`text-xs text-muted-foreground truncate ${entry.isResolved ? 'line-through' : ''}`}>
+              {entry.description}
+            </p>
+          )}
+        </div>
 
       <div className="flex items-center gap-1 ml-2 shrink-0">
         <Button
