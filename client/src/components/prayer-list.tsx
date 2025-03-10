@@ -12,9 +12,9 @@ interface PrayerListProps {
 export function PrayerList({ prayers, isLoading, category }: PrayerListProps) {
   if (isLoading) {
     return (
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} className="h-10 w-full" />
+          <Skeleton key={i} className="h-8 w-full" />
         ))}
       </div>
     );
@@ -22,7 +22,7 @@ export function PrayerList({ prayers, isLoading, category }: PrayerListProps) {
 
   if (prayers.length === 0) {
     return (
-      <div className="text-center py-4">
+      <div className="text-center py-2">
         <p className="text-sm text-muted-foreground">
           No prayers added for {category === "unbelievers" ? "unbelievers" : "brethren"} yet.
         </p>
@@ -31,7 +31,7 @@ export function PrayerList({ prayers, isLoading, category }: PrayerListProps) {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       {prayers.map((entry) => (
         <PrayerEntryCard key={entry.id} entry={entry} />
       ))}
