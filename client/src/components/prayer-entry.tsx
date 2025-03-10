@@ -27,8 +27,8 @@ export function PrayerEntryCard({ entry }: PrayerEntryCardProps) {
 
   const togglePrayer = useMutation({
     mutationFn: async () => {
-      await apiRequest("PATCH", `/prayers/${entry.id}`, {
-        isResolved: !entry.isResolved,
+      await apiRequest("PATCH", `/api/prayers/${entry.id}`, {
+        isResolved: !entry.isResolved, // Changed to isResolved
       });
     },
     onMutate: async () => {
@@ -38,7 +38,7 @@ export function PrayerEntryCard({ entry }: PrayerEntryCardProps) {
       queryClient.setQueryData([PRAYERS_QUERY_KEY], (old: any) => {
         return old.map((prayer: PrayerEntry) =>
           prayer.id === entry.id
-            ? { ...prayer, isResolved: !prayer.isResolved }
+            ? { ...prayer, isResolved: !prayer.isResolved } // Changed to isResolved
             : prayer,
         );
       });
@@ -57,7 +57,7 @@ export function PrayerEntryCard({ entry }: PrayerEntryCardProps) {
 
   const deletePrayer = useMutation({
     mutationFn: async () => {
-      await apiRequest("DELETE", `/prayers/${entry.id}`);
+      await apiRequest("DELETE", `/api/prayers/${entry.id}`);
     },
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: [PRAYERS_QUERY_KEY] });
