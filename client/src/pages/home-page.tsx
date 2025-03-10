@@ -14,7 +14,9 @@ import { PRAYERS_QUERY_KEY } from "@/lib/queries";
 export default function HomePage() {
   const { user, logoutMutation } = useAuth();
   const isMobile = useIsMobile();
-  const [activeTab, setActiveTab] = useState<"unbelievers" | "brethren">("unbelievers");
+  const [activeTab, setActiveTab] = useState<"unbelievers" | "brethren">(
+    "unbelievers",
+  );
 
   const { data: prayerEntries = [], isLoading } = useQuery({
     queryKey: [PRAYERS_QUERY_KEY],
