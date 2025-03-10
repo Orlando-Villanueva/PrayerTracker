@@ -2,8 +2,9 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Trash2 } from "lucide-react";
+import { CheckCircle, XCircle, Trash2 } from "lucide-react";
 import type { PrayerEntry } from "@shared/schema";
 import {
   AlertDialog,
@@ -84,11 +85,11 @@ export function PrayerEntryCard({ entry }: PrayerEntryCardProps) {
     : "text-blue-600 dark:text-blue-400";
 
   return (
-    <div className="flex items-center justify-between py-1 px-3 border rounded-md bg-background hover:bg-muted/30 transition-colors">
+    <div className="flex items-center justify-between py-2 px-4 border rounded-md bg-background hover:bg-muted/30 transition-colors">
       <div className="flex-1 min-w-0">
-        <h4 className="font-medium text-sm">{entry.name}</h4>
+        <h4 className="font-medium truncate">{entry.name}</h4>
         {entry.description && (
-          <p className="text-xs text-muted-foreground line-clamp-1">{entry.description}</p>
+          <p className="text-xs text-muted-foreground truncate">{entry.description}</p>
         )}
       </div>
       
@@ -96,11 +97,11 @@ export function PrayerEntryCard({ entry }: PrayerEntryCardProps) {
         <Button
           variant="ghost"
           size="icon"
-          className={`h-6 w-6 ${iconColor}`}
+          className={`h-7 w-7 ${iconColor}`}
           onClick={() => togglePrayer.mutate()}
           disabled={togglePrayer.isPending}
         >
-          <CheckCircle className="h-3.5 w-3.5" />
+          <CheckCircle className="h-4 w-4" />
         </Button>
         
         <AlertDialog open={open} onOpenChange={setOpen}>
@@ -108,9 +109,9 @@ export function PrayerEntryCard({ entry }: PrayerEntryCardProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 text-destructive"
+              className="h-7 w-7 text-destructive"
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <Trash2 className="h-4 w-4" />
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
@@ -122,7 +123,7 @@ export function PrayerEntryCard({ entry }: PrayerEntryCardProps) {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction 
+              <AlertDialogAction
                 onClick={() => deletePrayer.mutate()}
                 disabled={deletePrayer.isPending}
               >
