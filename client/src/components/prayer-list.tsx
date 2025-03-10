@@ -9,14 +9,9 @@ interface PrayerListProps {
 }
 
 export function PrayerList({ prayers, isLoading, category }: PrayerListProps) {
-  const containerStyles = {
-    unbelievers: "border-2 border-red-200 bg-red-50/30 dark:bg-red-950/10",
-    brethren: "border-2 border-blue-200 bg-blue-50/30 dark:bg-blue-950/10",
-  }[category];
-
   if (isLoading) {
     return (
-      <div className={`grid gap-4 rounded-lg p-4 ${containerStyles}`}>
+      <div className="grid gap-4">
         {Array.from({ length: 3 }).map((_, i) => (
           <Skeleton key={i} className="h-32" />
         ))}
@@ -26,7 +21,7 @@ export function PrayerList({ prayers, isLoading, category }: PrayerListProps) {
 
   if (prayers.length === 0) {
     return (
-      <div className={`text-center py-12 rounded-lg ${containerStyles}`}>
+      <div className="text-center py-12">
         <p className="text-muted-foreground">
           No prayers added for {category === "unbelievers" ? "unbelievers" : "brethren"} yet.
         </p>
@@ -35,7 +30,7 @@ export function PrayerList({ prayers, isLoading, category }: PrayerListProps) {
   }
 
   return (
-    <div className={`grid gap-4 rounded-lg p-4 ${containerStyles}`}>
+    <div className="grid gap-4">
       {prayers.map((entry) => (
         <PrayerEntryCard key={entry.id} entry={entry} />
       ))}
