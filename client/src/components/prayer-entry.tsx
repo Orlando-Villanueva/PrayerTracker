@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -35,15 +34,15 @@ export function PrayerEntryCard({ entry }: PrayerEntryCardProps) {
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: [PRAYERS_QUERY_KEY] });
       const previousPrayers = queryClient.getQueryData([PRAYERS_QUERY_KEY]);
-      
+
       queryClient.setQueryData([PRAYERS_QUERY_KEY], (old: any) => {
         return old.map((prayer: PrayerEntry) =>
           prayer.id === entry.id
             ? { ...prayer, isAnswered: !prayer.isAnswered }
-            : prayer
+            : prayer,
         );
       });
-      
+
       return { previousPrayers };
     },
     onError: (err, _, context) => {
@@ -63,11 +62,11 @@ export function PrayerEntryCard({ entry }: PrayerEntryCardProps) {
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: [PRAYERS_QUERY_KEY] });
       const previousPrayers = queryClient.getQueryData([PRAYERS_QUERY_KEY]);
-      
+
       queryClient.setQueryData([PRAYERS_QUERY_KEY], (old: any) => {
         return old.filter((prayer: PrayerEntry) => prayer.id !== entry.id);
       });
-      
+
       return { previousPrayers };
     },
     onError: (err, _, context) => {
@@ -80,19 +79,22 @@ export function PrayerEntryCard({ entry }: PrayerEntryCardProps) {
     },
   });
 
-  const iconColor = entry.category === "unbelievers" 
-    ? "text-red-600 dark:text-red-400" 
-    : "text-blue-600 dark:text-blue-400";
+  const iconColor =
+    entry.category === "unbelievers"
+      ? "text-red-600 dark:text-red-400"
+      : "text-blue-600 dark:text-blue-400";
 
   return (
-    <div className="flex items-center justify-between py-3 px-4 border rounded-lg bg-background hover:bg-muted/30 transition-colors shadow-sm mb-2">
+    <div className="flex items-center justify-between py-3 px-4 border rounded-lg bg-background transition-colors shadow-sm mb-2">
       <div className="flex-1 min-w-0">
         <h4 className="font-medium truncate">{entry.name}</h4>
         {entry.description && (
-          <p className="text-xs text-muted-foreground truncate">{entry.description}</p>
+          <p className="text-xs text-muted-foreground truncate">
+            {entry.description}
+          </p>
         )}
       </div>
-      
+
       <div className="flex items-center gap-1 ml-2 shrink-0">
         <Button
           variant="ghost"
@@ -103,7 +105,7 @@ export function PrayerEntryCard({ entry }: PrayerEntryCardProps) {
         >
           <CheckCircle className="h-4 w-4" />
         </Button>
-        
+
         <AlertDialog open={open} onOpenChange={setOpen}>
           <AlertDialogTrigger asChild>
             <Button
@@ -118,7 +120,8 @@ export function PrayerEntryCard({ entry }: PrayerEntryCardProps) {
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Prayer Entry</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete this prayer entry? This action cannot be undone.
+                Are you sure you want to delete this prayer entry? This action
+                cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
