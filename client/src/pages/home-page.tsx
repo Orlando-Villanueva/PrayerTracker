@@ -43,8 +43,8 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div className="flex min-h-screen flex-col bg-white">
+      <header className="sticky top-0 z-10 border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
         <div className="container flex h-14 max-w-screen-2xl items-center px-4">
           <div className="mr-4 flex items-center md:mr-6">
             <strong className="font-semibold tracking-tight">

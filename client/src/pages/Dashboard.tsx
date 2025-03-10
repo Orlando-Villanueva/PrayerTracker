@@ -117,7 +117,7 @@ export default function Dashboard() {
       <div className="flex-1 container max-w-3xl py-2 px-4">
         <div className="md:hidden mb-4">
           <Button 
-            className="w-full bg-[hsl(220_16%_22%)] hover:bg-[hsl(220_16%_18%)] text-white"
+            className="w-full bg-gray-800 hover:bg-gray-700 text-white"
             onClick={() => setIsFormOpen(true)}
           >
             <PlusIcon className="h-4 w-4 mr-1" />
