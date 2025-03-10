@@ -48,22 +48,39 @@ export default function Dashboard() {
       const prayer = prayers.find((p) => p.id === id);
       if (!prayer) return;
 
+      // Optimistically update UI
+      setPrayers(prev => prev.map(p => 
+        p.id === id ? {...p, answered: !p.answered} : p
+      ));
+
+      // Then update server
       await api.patch(`/prayers/${id}`, {
-        answered: !prayer.answered,
+        isResolved: !prayer.answered,
       });
       
+      // Refresh from server to ensure consistency
       await fetchPrayers();
     } catch (error) {
       console.error("Error toggling prayer:", error);
+      // Revert UI on error
+      await fetchPrayers();
     }
   };
 
   const handleDelete = async (id: number) => {
     try {
+      // Optimistically update UI
+      setPrayers(prev => prev.filter(p => p.id !== id));
+      
+      // Then update server
       await api.delete(`/prayers/${id}`);
+      
+      // Refresh from server to ensure consistency
       await fetchPrayers();
     } catch (error) {
       console.error("Error deleting prayer:", error);
+      // Revert UI on error
+      await fetchPrayers();
     }
   };
 
