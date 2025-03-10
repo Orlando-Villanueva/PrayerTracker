@@ -1,18 +1,15 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Prayer } from "@/shared/schema";
-
 import { PlusIcon } from "lucide-react";
-
 import { useUser } from "@/contexts/UserContext";
 import { useApi } from "@/hooks/use-api";
-
 import { Button } from "@/components/ui/button";
-
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PrayerItem } from "@/components/PrayerItem";
 import { MobileHeader } from "@/components/MobileHeader";
 import { PrayerFormDialog } from "@/components/PrayerFormDialog";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ResponsiveTabs,
   ResponsiveTabsList,
@@ -23,65 +20,96 @@ import {
 export default function Dashboard() {
   const { user } = useUser();
   const api = useApi();
+  const queryClient = useQueryClient();
   const isMobile = useIsMobile();
-  const [prayers, setPrayers] = useState<Prayer[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
 
-  useEffect(() => {
-    if (user) {
-      fetchPrayers();
-    }
-  }, [user]);
-
-  const fetchPrayers = async () => {
-    try {
+  // Use React Query to fetch prayers
+  const { data: prayers = [], isLoading } = useQuery({
+    queryKey: ['prayers'],
+    queryFn: async () => {
       const response = await api.get("/prayers");
-      setPrayers(response.data);
-    } catch (error) {
-      console.error("Error fetching prayers:", error);
-    }
-  };
+      return response.data;
+    },
+    enabled: !!user,
+  });
 
-  const handleToggle = async (id: number) => {
-    try {
-      const prayer = prayers.find((p) => p.id === id);
-      if (!prayer) return;
-
-      // Optimistically update UI
-      setPrayers(prev => prev.map(p => 
-        p.id === id ? {...p, answered: !p.answered} : p
-      ));
-
-      // Then update server
+  // Mutation for toggling prayer status
+  const togglePrayer = useMutation({
+    mutationFn: async ({ id, answered }: { id: number, answered: boolean }) => {
       await api.patch(`/prayers/${id}`, {
-        isResolved: !prayer.answered,
+        isResolved: !answered,
       });
+    },
+    // Optimistically update UI
+    onMutate: async ({ id, answered }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['prayers'] });
       
-      // Refresh from server to ensure consistency
-      await fetchPrayers();
-    } catch (error) {
-      console.error("Error toggling prayer:", error);
-      // Revert UI on error
-      await fetchPrayers();
+      // Snapshot the previous value
+      const previousPrayers = queryClient.getQueryData(['prayers']);
+      
+      // Optimistically update to the new value
+      queryClient.setQueryData(['prayers'], (old: Prayer[] = []) => 
+        old.map(prayer => 
+          prayer.id === id ? { ...prayer, answered: !answered } : prayer
+        )
+      );
+      
+      // Return a context object with the snapshotted value
+      return { previousPrayers };
+    },
+    // If the mutation fails, use the context returned from onMutate to roll back
+    onError: (err, variables, context) => {
+      queryClient.setQueryData(['prayers'], context?.previousPrayers);
+    },
+    // Always refetch after error or success
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['prayers'] });
+    },
+  });
+
+  // Mutation for deleting prayers
+  const deletePrayer = useMutation({
+    mutationFn: async (id: number) => {
+      await api.delete(`/prayers/${id}`);
+    },
+    // Optimistically update UI
+    onMutate: async (id) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['prayers'] });
+      
+      // Snapshot the previous value
+      const previousPrayers = queryClient.getQueryData(['prayers']);
+      
+      // Optimistically update to the new value
+      queryClient.setQueryData(['prayers'], (old: Prayer[] = []) => 
+        old.filter(prayer => prayer.id !== id)
+      );
+      
+      // Return a context object with the snapshotted value
+      return { previousPrayers };
+    },
+    // If the mutation fails, use the context returned from onMutate to roll back
+    onError: (err, variables, context) => {
+      queryClient.setQueryData(['prayers'], context?.previousPrayers);
+    },
+    // Always refetch after error or success
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['prayers'] });
+    },
+  });
+
+  const handleToggle = (id: number) => {
+    const prayer = prayers.find(p => p.id === id);
+    if (prayer) {
+      togglePrayer.mutate({ id, answered: prayer.answered });
     }
   };
 
-  const handleDelete = async (id: number) => {
-    try {
-      // Optimistically update UI
-      setPrayers(prev => prev.filter(p => p.id !== id));
-      
-      // Then update server
-      await api.delete(`/prayers/${id}`);
-      
-      // Refresh from server to ensure consistency
-      await fetchPrayers();
-    } catch (error) {
-      console.error("Error deleting prayer:", error);
-      // Revert UI on error
-      await fetchPrayers();
-    }
+  const handleDelete = (id: number) => {
+    deletePrayer.mutate(id);
   };
 
   const filteredPrayers = () => {

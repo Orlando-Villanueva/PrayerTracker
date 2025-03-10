@@ -1,4 +1,3 @@
-
 import React from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -9,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useApi } from "@/hooks/use-api";
+import { useQueryClient } from "@tanstack/react-query"; // Added import
 
 const formSchema = z.object({
   name: z.string().min(1, "Prayer name is required"),
@@ -20,10 +20,9 @@ type FormValues = z.infer<typeof formSchema>;
 interface PrayerFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess: () => void;
 }
 
-export function PrayerFormDialog({ open, onOpenChange, onSuccess }: PrayerFormDialogProps) {
+export function PrayerFormDialog({ open, onOpenChange }: PrayerFormDialogProps) {
   const api = useApi();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -32,13 +31,14 @@ export function PrayerFormDialog({ open, onOpenChange, onSuccess }: PrayerFormDi
       description: "",
     },
   });
+  const queryClient = useQueryClient(); // Added useQueryClient hook
 
   const onSubmit = async (values: FormValues) => {
     try {
       await api.post("/prayers", values);
       form.reset();
       onOpenChange(false);
-      onSuccess();
+      queryClient.invalidateQueries({ queryKey: ['prayers'] }); // Update UI after successful post
     } catch (error) {
       console.error("Error creating prayer:", error);
     }
@@ -50,7 +50,7 @@ export function PrayerFormDialog({ open, onOpenChange, onSuccess }: PrayerFormDi
         <DialogHeader>
           <DialogTitle>Add New Prayer</DialogTitle>
         </DialogHeader>
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -66,7 +66,7 @@ export function PrayerFormDialog({ open, onOpenChange, onSuccess }: PrayerFormDi
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="description"
@@ -83,7 +83,7 @@ export function PrayerFormDialog({ open, onOpenChange, onSuccess }: PrayerFormDi
                 </FormItem>
               )}
             />
-            
+
             <div className="flex justify-end gap-2">
               <Button 
                 type="button" 
