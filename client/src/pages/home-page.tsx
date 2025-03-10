@@ -87,12 +87,7 @@ export default function HomePage() {
               <AddPrayerDialog category={activeTab}>
                 <Button
                   variant="outline"
-                  className={`w-full flex items-center justify-center rounded-lg shadow-sm
-                    ${
-                      activeTab === "unbelievers"
-                        ? "bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 hover:text-red-800"
-                        : "bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 hover:text-blue-800"
-                    }`}
+                  className="w-full flex items-center justify-center rounded-lg shadow-sm"
                 >
                   <PlusCircle className="h-4 w-4 mr-2" />
                   <span>Add Person</span>
