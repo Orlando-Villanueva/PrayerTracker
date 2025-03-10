@@ -49,7 +49,7 @@ export default function Dashboard() {
       if (!prayer) return;
 
       await api.patch(`/prayers/${id}`, {
-        answered: !prayer.answered,
+        isResolved: !prayer.answered,
       });
       
       await fetchPrayers();
