@@ -19,7 +19,7 @@ export default function HomePage() {
   const { data: prayerEntries = [], isLoading } = useQuery({
     queryKey: [PRAYERS_QUERY_KEY],
     queryFn: async () => {
-      const response = await fetch("/api/prayers"); //The edited snippet incorrectly tries to use PRAYERS_QUERY_KEY as the URL.  The URL should remain /api/prayers.
+      const response = await fetch("/api/prayers");
       if (!response.ok) {
         throw new Error("Failed to fetch prayers");
       }
