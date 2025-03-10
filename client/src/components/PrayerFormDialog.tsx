@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useApi } from "@/hooks/use-api";
-import { useQueryClient } from "@tanstack/react-query"; // Added import
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 const formSchema = z.object({
   name: z.string().min(1, "Prayer name is required"),
@@ -23,7 +23,6 @@ interface PrayerFormDialogProps {
 }
 
 export function PrayerFormDialog({ open, onOpenChange }: PrayerFormDialogProps) {
-  const api = useApi();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -31,17 +30,20 @@ export function PrayerFormDialog({ open, onOpenChange }: PrayerFormDialogProps) 
       description: "",
     },
   });
-  const queryClient = useQueryClient(); // Added useQueryClient hook
 
-  const onSubmit = async (values: FormValues) => {
-    try {
-      await api.post("/prayers", values);
+  const addPrayer = useMutation({
+    mutationFn: async (data: FormValues) => {
+      await apiRequest("POST", "/api/prayers", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/prayers'] });
       form.reset();
       onOpenChange(false);
-      queryClient.invalidateQueries({ queryKey: ['prayers'] }); // Update UI after successful post
-    } catch (error) {
-      console.error("Error creating prayer:", error);
-    }
+    },
+  });
+
+  const onSubmit = (values: FormValues) => {
+    addPrayer.mutate(values);
   };
 
   return (
@@ -77,7 +79,8 @@ export function PrayerFormDialog({ open, onOpenChange }: PrayerFormDialogProps) 
                     <Textarea 
                       placeholder="Enter more details about your prayer"
                       className="resize-none"
-                      {...field}
+                      {...field} 
+                      value={field.value || ''}
                     />
                   </FormControl>
                 </FormItem>
@@ -92,7 +95,12 @@ export function PrayerFormDialog({ open, onOpenChange }: PrayerFormDialogProps) 
               >
                 Cancel
               </Button>
-              <Button type="submit">Add Prayer</Button>
+              <Button 
+                type="submit" 
+                disabled={addPrayer.isPending}
+              >
+                Add Prayer
+              </Button>
             </div>
           </form>
         </Form>

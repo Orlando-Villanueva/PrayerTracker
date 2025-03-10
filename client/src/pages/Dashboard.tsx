@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Prayer } from "@/shared/schema";
 import { PlusIcon } from "lucide-react";
@@ -25,9 +24,9 @@ export default function Dashboard() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
 
-  // Use React Query to fetch prayers
+  // Use React Query to fetch prayers with consistent query key
   const { data: prayers = [], isLoading } = useQuery({
-    queryKey: ['prayers'],
+    queryKey: ['/api/prayers'],
     queryFn: async () => {
       const response = await api.get("/prayers");
       return response.data;
@@ -37,36 +36,14 @@ export default function Dashboard() {
 
   // Mutation for toggling prayer status
   const togglePrayer = useMutation({
-    mutationFn: async ({ id, answered }: { id: number, answered: boolean }) => {
+    mutationFn: async (id: number) => {
+      const prayer = prayers.find((p: Prayer) => p.id === id);
       await api.patch(`/prayers/${id}`, {
-        isResolved: !answered,
+        isResolved: !prayer?.answered,
       });
     },
-    // Optimistically update UI
-    onMutate: async ({ id, answered }) => {
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['prayers'] });
-      
-      // Snapshot the previous value
-      const previousPrayers = queryClient.getQueryData(['prayers']);
-      
-      // Optimistically update to the new value
-      queryClient.setQueryData(['prayers'], (old: Prayer[] = []) => 
-        old.map(prayer => 
-          prayer.id === id ? { ...prayer, answered: !answered } : prayer
-        )
-      );
-      
-      // Return a context object with the snapshotted value
-      return { previousPrayers };
-    },
-    // If the mutation fails, use the context returned from onMutate to roll back
-    onError: (err, variables, context) => {
-      queryClient.setQueryData(['prayers'], context?.previousPrayers);
-    },
-    // Always refetch after error or success
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['prayers'] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/prayers'] });
     },
   });
 
@@ -75,37 +52,13 @@ export default function Dashboard() {
     mutationFn: async (id: number) => {
       await api.delete(`/prayers/${id}`);
     },
-    // Optimistically update UI
-    onMutate: async (id) => {
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['prayers'] });
-      
-      // Snapshot the previous value
-      const previousPrayers = queryClient.getQueryData(['prayers']);
-      
-      // Optimistically update to the new value
-      queryClient.setQueryData(['prayers'], (old: Prayer[] = []) => 
-        old.filter(prayer => prayer.id !== id)
-      );
-      
-      // Return a context object with the snapshotted value
-      return { previousPrayers };
-    },
-    // If the mutation fails, use the context returned from onMutate to roll back
-    onError: (err, variables, context) => {
-      queryClient.setQueryData(['prayers'], context?.previousPrayers);
-    },
-    // Always refetch after error or success
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['prayers'] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/prayers'] });
     },
   });
 
   const handleToggle = (id: number) => {
-    const prayer = prayers.find(p => p.id === id);
-    if (prayer) {
-      togglePrayer.mutate({ id, answered: prayer.answered });
-    }
+    togglePrayer.mutate(id);
   };
 
   const handleDelete = (id: number) => {
@@ -114,9 +67,9 @@ export default function Dashboard() {
 
   const filteredPrayers = () => {
     if (activeTab === "unanswered") {
-      return prayers.filter((prayer) => !prayer.answered);
+      return prayers.filter((prayer: Prayer) => !prayer.answered);
     } else if (activeTab === "answered") {
-      return prayers.filter((prayer) => prayer.answered);
+      return prayers.filter((prayer: Prayer) => prayer.answered);
     } else {
       return prayers;
     }
@@ -125,7 +78,7 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <MobileHeader onAddPrayer={() => setIsFormOpen(true)} />
-      
+
       <div className="flex-1 container max-w-3xl py-2 px-4">
         <div className="md:hidden mb-4">
           <Button 
@@ -136,7 +89,7 @@ export default function Dashboard() {
             Add Prayer
           </Button>
         </div>
-        
+
         <ResponsiveTabs value={activeTab} onValueChange={setActiveTab}>
           <ResponsiveTabsList>
             <ResponsiveTabsTrigger value="all">
@@ -149,7 +102,7 @@ export default function Dashboard() {
               Answered
             </ResponsiveTabsTrigger>
           </ResponsiveTabsList>
-          
+
           <ResponsiveTabsContent value={activeTab} className="mt-4">
             {filteredPrayers().length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
@@ -157,7 +110,7 @@ export default function Dashboard() {
               </div>
             ) : (
               <div>
-                {filteredPrayers().map((prayer) => (
+                {filteredPrayers().map((prayer: Prayer) => (
                   <PrayerItem
                     key={prayer.id}
                     prayer={prayer}
@@ -174,7 +127,6 @@ export default function Dashboard() {
       <PrayerFormDialog
         open={isFormOpen}
         onOpenChange={setIsFormOpen}
-        onSuccess={fetchPrayers}
       />
     </div>
   );
