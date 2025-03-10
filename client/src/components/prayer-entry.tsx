@@ -85,7 +85,7 @@ export function PrayerEntryCard({ entry }: PrayerEntryCardProps) {
     : "text-blue-600 dark:text-blue-400";
 
   return (
-    <div className="flex items-center justify-between py-2 px-4 border rounded-md bg-background hover:bg-muted/30 transition-colors">
+    <div className="flex items-center justify-between py-3 px-4 border rounded-lg bg-background hover:bg-muted/30 transition-colors shadow-sm mb-2">
       <div className="flex-1 min-w-0">
         <h4 className="font-medium truncate">{entry.name}</h4>
         {entry.description && (
