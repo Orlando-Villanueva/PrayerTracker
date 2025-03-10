@@ -98,7 +98,7 @@ export default function HomePage() {
               </AddPrayerDialog>
             </div>
             <TabsContent value="unbelievers">
-              <Card className="bg-red-50/30 dark:bg-red-950/10">
+              <Card className="bg-red-50/30 dark:bg-red-950/10 border">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-red-700 dark:text-red-400 mb-4">
                     Unbelievers
@@ -114,7 +114,7 @@ export default function HomePage() {
               </Card>
             </TabsContent>
             <TabsContent value="brethren">
-              <Card className="bg-blue-50/30 dark:bg-blue-950/10">
+              <Card className="bg-blue-50/30 dark:bg-blue-950/10 border">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-blue-700 dark:text-blue-400 mb-4">
                     Brethren in Hardship
