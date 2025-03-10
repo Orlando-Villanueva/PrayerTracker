@@ -6,8 +6,8 @@ export type PrayersResponse = Prayer[];
 
 export const prayersQueryOptions = {
   queryKey: [PRAYERS_QUERY_KEY],
-  queryFn: async ({ queryKey }): Promise<PrayersResponse> => {
-    const response = await fetch(queryKey[0]);
+  queryFn: async (): Promise<PrayersResponse> => {
+    const response = await fetch(PRAYERS_QUERY_KEY);
     if (!response.ok) {
       throw new Error('Failed to fetch prayers');
     }

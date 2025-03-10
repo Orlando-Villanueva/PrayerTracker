@@ -9,16 +9,17 @@ import { PlusCircle } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { PrayerEntry } from "@shared/schema";
+import { PRAYERS_QUERY_KEY } from "@/lib/queries";
 
 export default function HomePage() {
   const { user, logoutMutation } = useAuth();
   const isMobile = useIsMobile();
-  const [activeTab, setActiveTab] = useState("unbelievers");
+  const [activeTab, setActiveTab] = useState<"unbelievers" | "brethren">("unbelievers");
 
   const { data: prayerEntries = [], isLoading } = useQuery({
-    queryKey: ["prayers"],
+    queryKey: [PRAYERS_QUERY_KEY],
     queryFn: async () => {
-      const response = await fetch("/api/prayers");
+      const response = await fetch("/api/prayers"); //The edited snippet incorrectly tries to use PRAYERS_QUERY_KEY as the URL.  The URL should remain /api/prayers.
       if (!response.ok) {
         throw new Error("Failed to fetch prayers");
       }

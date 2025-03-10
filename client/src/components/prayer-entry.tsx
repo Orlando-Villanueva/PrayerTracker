@@ -16,6 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { PRAYERS_QUERY_KEY } from "@/lib/queries";
 
 interface PrayerEntryProps {
   entry: PrayerEntry;
@@ -31,7 +32,7 @@ export function PrayerEntryCard({ entry }: PrayerEntryProps) {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/prayers"] });
+      queryClient.invalidateQueries({ queryKey: [PRAYERS_QUERY_KEY] });
     },
   });
 
@@ -40,7 +41,7 @@ export function PrayerEntryCard({ entry }: PrayerEntryProps) {
       await apiRequest("DELETE", `/api/prayers/${entry.id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/prayers"] });
+      queryClient.invalidateQueries({ queryKey: [PRAYERS_QUERY_KEY] });
     },
   });
 
