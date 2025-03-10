@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useApi } from "@/hooks/use-api";
+
+const PRAYERS_QUERY_KEY = "/api/prayers";
 
 const formSchema = z.object({
   name: z.string().min(1, "Prayer name is required"),
@@ -23,6 +25,9 @@ interface PrayerFormDialogProps {
 }
 
 export function PrayerFormDialog({ open, onOpenChange }: PrayerFormDialogProps) {
+  const api = useApi();
+  const queryClient = useQueryClient();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -33,10 +38,25 @@ export function PrayerFormDialog({ open, onOpenChange }: PrayerFormDialogProps) 
 
   const addPrayer = useMutation({
     mutationFn: async (data: FormValues) => {
-      await apiRequest("POST", "/api/prayers", data);
+      const response = await api.post("/prayers", data);
+      return response.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/prayers'] });
+    onMutate: async (newPrayer) => {
+      await queryClient.cancelQueries({ queryKey: [PRAYERS_QUERY_KEY] });
+      const previousPrayers = queryClient.getQueryData([PRAYERS_QUERY_KEY]);
+
+      queryClient.setQueryData([PRAYERS_QUERY_KEY], (old: any[] = []) => [
+        ...old,
+        { id: Date.now(), ...newPrayer, answered: false },
+      ]);
+
+      return { previousPrayers };
+    },
+    onError: (err, newPrayer, context) => {
+      queryClient.setQueryData([PRAYERS_QUERY_KEY], context?.previousPrayers);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: [PRAYERS_QUERY_KEY] });
       form.reset();
       onOpenChange(false);
     },

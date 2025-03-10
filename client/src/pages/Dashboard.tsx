@@ -16,6 +16,8 @@ import {
   ResponsiveTabsContent,
 } from "@/components/ui/tabs-responsive";
 
+const PRAYERS_QUERY_KEY = "/api/prayers";
+
 export default function Dashboard() {
   const { user } = useUser();
   const api = useApi();
@@ -24,9 +26,8 @@ export default function Dashboard() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
 
-  // Use React Query to fetch prayers with consistent query key
   const { data: prayers = [], isLoading } = useQuery({
-    queryKey: ['/api/prayers'],
+    queryKey: [PRAYERS_QUERY_KEY],
     queryFn: async () => {
       const response = await api.get("/prayers");
       return response.data;
@@ -34,7 +35,6 @@ export default function Dashboard() {
     enabled: !!user,
   });
 
-  // Mutation for toggling prayer status
   const togglePrayer = useMutation({
     mutationFn: async (id: number) => {
       const prayer = prayers.find((p: Prayer) => p.id === id);
@@ -42,18 +42,45 @@ export default function Dashboard() {
         isResolved: !prayer?.answered,
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/prayers'] });
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: [PRAYERS_QUERY_KEY] });
+      const previousPrayers = queryClient.getQueryData([PRAYERS_QUERY_KEY]);
+
+      queryClient.setQueryData([PRAYERS_QUERY_KEY], (old: Prayer[] = []) => 
+        old.map(prayer => 
+          prayer.id === id ? { ...prayer, answered: !prayer.answered } : prayer
+        )
+      );
+
+      return { previousPrayers };
+    },
+    onError: (err, id, context) => {
+      queryClient.setQueryData([PRAYERS_QUERY_KEY], context?.previousPrayers);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: [PRAYERS_QUERY_KEY] });
     },
   });
 
-  // Mutation for deleting prayers
   const deletePrayer = useMutation({
     mutationFn: async (id: number) => {
       await api.delete(`/prayers/${id}`);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/prayers'] });
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: [PRAYERS_QUERY_KEY] });
+      const previousPrayers = queryClient.getQueryData([PRAYERS_QUERY_KEY]);
+
+      queryClient.setQueryData([PRAYERS_QUERY_KEY], (old: Prayer[] = []) => 
+        old.filter(prayer => prayer.id !== id)
+      );
+
+      return { previousPrayers };
+    },
+    onError: (err, id, context) => {
+      queryClient.setQueryData([PRAYERS_QUERY_KEY], context?.previousPrayers);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: [PRAYERS_QUERY_KEY] });
     },
   });
 
