@@ -9,8 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/hooks/use-api";
-
-const PRAYERS_QUERY_KEY = "/api/prayers";
+import { PRAYERS_QUERY_KEY } from "@/lib/queries";
+import type { Prayer } from "@/shared/schema";
 
 const formSchema = z.object({
   name: z.string().min(1, "Prayer name is required"),
@@ -39,21 +39,33 @@ export function PrayerFormDialog({ open, onOpenChange }: PrayerFormDialogProps) 
   const addPrayer = useMutation({
     mutationFn: async (data: FormValues) => {
       const response = await api.post("/prayers", data);
-      return response.data;
+      return response.data as Prayer;
     },
     onMutate: async (newPrayer) => {
       await queryClient.cancelQueries({ queryKey: [PRAYERS_QUERY_KEY] });
-      const previousPrayers = queryClient.getQueryData([PRAYERS_QUERY_KEY]);
+      const previousPrayers = queryClient.getQueryData<Prayer[]>([PRAYERS_QUERY_KEY]);
 
-      queryClient.setQueryData([PRAYERS_QUERY_KEY], (old: any[] = []) => [
+      // Create an optimistic prayer entry
+      const optimisticPrayer: Prayer = {
+        id: Date.now(),
+        name: newPrayer.name,
+        description: newPrayer.description || "",
+        answered: false,
+        userId: 0, // Will be set by the server
+        createdAt: new Date().toISOString(),
+      };
+
+      queryClient.setQueryData<Prayer[]>([PRAYERS_QUERY_KEY], (old = []) => [
         ...old,
-        { id: Date.now(), ...newPrayer, answered: false },
+        optimisticPrayer,
       ]);
 
       return { previousPrayers };
     },
     onError: (err, newPrayer, context) => {
-      queryClient.setQueryData([PRAYERS_QUERY_KEY], context?.previousPrayers);
+      if (context?.previousPrayers) {
+        queryClient.setQueryData([PRAYERS_QUERY_KEY], context.previousPrayers);
+      }
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: [PRAYERS_QUERY_KEY] });
@@ -100,7 +112,7 @@ export function PrayerFormDialog({ open, onOpenChange }: PrayerFormDialogProps) 
                       placeholder="Enter more details about your prayer"
                       className="resize-none"
                       {...field} 
-                      value={field.value || ''}
+                      value={field.value || ""}
                     />
                   </FormControl>
                 </FormItem>
