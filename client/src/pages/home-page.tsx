@@ -106,7 +106,7 @@ export default function HomePage() {
                     Unbelievers
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-3 py-2">
                   <PrayerList
                     prayers={unbelieversPrayers}
                     isLoading={isLoading}
@@ -122,7 +122,7 @@ export default function HomePage() {
                     Brethren in Hardship
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-3 py-2">
                   <PrayerList
                     prayers={brethrenPrayers}
                     isLoading={isLoading}
@@ -141,8 +141,8 @@ export default function HomePage() {
                   Unbelievers
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="mb-4 flex justify-end">
+              <CardContent className="px-3 py-2">
+                <div className="mb-3 flex justify-end">
                   <AddPrayerDialog category="unbelievers">
                     <Button
                       size="sm"
@@ -169,8 +169,8 @@ export default function HomePage() {
                   Brethren in Hardship
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="mb-4 flex justify-end">
+              <CardContent className="px-3 py-2">
+                <div className="mb-3 flex justify-end">
                   <AddPrayerDialog category="brethren">
                     <Button
                       size="sm"

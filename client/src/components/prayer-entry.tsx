@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -18,20 +19,39 @@ import {
 } from "@/components/ui/alert-dialog";
 import { PRAYERS_QUERY_KEY } from "@/lib/queries";
 
-interface PrayerEntryProps {
+interface PrayerEntryCardProps {
   entry: PrayerEntry;
 }
 
-export function PrayerEntryCard({ entry }: PrayerEntryProps) {
-  const [showDelete, setShowDelete] = useState(false);
+export function PrayerEntryCard({ entry }: PrayerEntryCardProps) {
+  const [open, setOpen] = useState(false);
 
-  const toggleResolved = useMutation({
+  const togglePrayer = useMutation({
     mutationFn: async () => {
       await apiRequest("PATCH", `/api/prayers/${entry.id}`, {
-        isResolved: !entry.isResolved,
+        isAnswered: !entry.isAnswered,
       });
     },
-    onSuccess: () => {
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: [PRAYERS_QUERY_KEY] });
+      const previousPrayers = queryClient.getQueryData([PRAYERS_QUERY_KEY]);
+      
+      queryClient.setQueryData([PRAYERS_QUERY_KEY], (old: any) => {
+        return old.map((prayer: PrayerEntry) =>
+          prayer.id === entry.id
+            ? { ...prayer, isAnswered: !prayer.isAnswered }
+            : prayer
+        );
+      });
+      
+      return { previousPrayers };
+    },
+    onError: (err, _, context) => {
+      if (context?.previousPrayers) {
+        queryClient.setQueryData([PRAYERS_QUERY_KEY], context.previousPrayers);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: [PRAYERS_QUERY_KEY] });
     },
   });
@@ -40,62 +60,79 @@ export function PrayerEntryCard({ entry }: PrayerEntryProps) {
     mutationFn: async () => {
       await apiRequest("DELETE", `/api/prayers/${entry.id}`);
     },
-    onSuccess: () => {
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: [PRAYERS_QUERY_KEY] });
+      const previousPrayers = queryClient.getQueryData([PRAYERS_QUERY_KEY]);
+      
+      queryClient.setQueryData([PRAYERS_QUERY_KEY], (old: any) => {
+        return old.filter((prayer: PrayerEntry) => prayer.id !== entry.id);
+      });
+      
+      return { previousPrayers };
+    },
+    onError: (err, _, context) => {
+      if (context?.previousPrayers) {
+        queryClient.setQueryData([PRAYERS_QUERY_KEY], context.previousPrayers);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: [PRAYERS_QUERY_KEY] });
     },
   });
 
+  const iconColor = entry.category === "unbelievers" 
+    ? "text-red-600 dark:text-red-400" 
+    : "text-blue-600 dark:text-blue-400";
+
   return (
-    <Card className={`${entry.isResolved ? "opacity-75" : ""} hover:shadow-md transition-shadow`}>
-      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-3 gap-4">
-        <div className="flex-1">
-          <h3 className={`text-xl font-medium ${entry.isResolved ? "line-through" : ""}`}>
-            {entry.name}
-          </h3>
-          <p className="text-sm text-muted-foreground mt-1 break-words">
-            {entry.description}
-          </p>
-        </div>
-        <div className="flex gap-2 shrink-0">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => toggleResolved.mutate()}
-            disabled={toggleResolved.isPending}
-            className="h-9 w-9"
-          >
-            {entry.isResolved ? (
-              <XCircle className="h-5 w-5 text-muted-foreground" />
-            ) : (
-              <CheckCircle className="h-5 w-5 text-success" />
-            )}
-          </Button>
-          <AlertDialog open={showDelete} onOpenChange={setShowDelete}>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-9 w-9">
-                <Trash2 className="h-5 w-5 text-destructive" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete Prayer Entry</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Are you sure you want to delete this prayer entry? This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => deletePrayer.mutate()}
-                  disabled={deletePrayer.isPending}
-                >
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      </CardHeader>
-    </Card>
+    <div className="flex items-center justify-between py-2 px-4 border rounded-md bg-background hover:bg-muted/30 transition-colors">
+      <div className="flex-1 min-w-0">
+        <h4 className="font-medium truncate">{entry.name}</h4>
+        {entry.description && (
+          <p className="text-xs text-muted-foreground truncate">{entry.description}</p>
+        )}
+      </div>
+      
+      <div className="flex items-center gap-1 ml-2 shrink-0">
+        <Button
+          variant="ghost"
+          size="icon"
+          className={`h-7 w-7 ${iconColor}`}
+          onClick={() => togglePrayer.mutate()}
+          disabled={togglePrayer.isPending}
+        >
+          <CheckCircle className="h-4 w-4" />
+        </Button>
+        
+        <AlertDialog open={open} onOpenChange={setOpen}>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Prayer Entry</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this prayer entry? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => deletePrayer.mutate()}
+                disabled={deletePrayer.isPending}
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    </div>
   );
 }
